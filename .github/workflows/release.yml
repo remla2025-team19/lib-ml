@@ -1,0 +1,41 @@
+name: Release lib-ml
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install setuptools wheel twine
+          pip install -r requirements.txt
+          
+      - name: Update version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          sed -i "s/version=\".*\"/version=\"$VERSION\"/" setup.py
+          sed -i "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" src/lib_ml/__init__.py
+          
+      - name: Build and publish
+        run: |
+          python setup.py sdist bdist_wheel
+          twine upload --repository-url https://pypi.pkg.github.com dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
