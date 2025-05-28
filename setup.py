@@ -13,5 +13,5 @@ setup(
         "nltk==3.9.1",
         "scikit-learn==1.6.1"
     ],
-    python_requires="==3.12.9",
+    python_requires="==3.11.12",
 )
